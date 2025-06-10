@@ -1,45 +1,94 @@
 // Garante que o código só rode na página de estoque
-if (location.pathname.includes('estoque.html')) {
+if (document.body.id === 'page-estoque' || location.pathname.includes('estoque.html')) {
   // --- VERIFICAÇÃO DE LOGIN ---
   if (!localStorage.getItem('usuarioLogado')) {
     window.location.href = 'index.html';
   }
 
   // --- ELEMENTOS DO DOM ---
-  const formProduto = document.getElementById('form-produto');
-  const nomeInput = document.getElementById('nome');
-  const quantidadeInput = document.getElementById('quantidade');
   const filtroInput = document.getElementById('filtro');
   const listaProdutos = document.getElementById('lista-produtos');
   const logoutBtn = document.getElementById('logout-btn');
 
-  // --- ELEMENTOS DO MODAL ---
-  const modalOverlay = document.getElementById('edit-modal-overlay');
+  // --- MODAL DE ADICIONAR ---
+  const openAddModalBtn = document.getElementById('open-add-modal-btn');
+  const addModalOverlay = document.getElementById('add-modal-overlay');
+  const addForm = document.getElementById('add-form');
+  const addNomeInput = document.getElementById('add-nome');
+  const addQuantidadeInput = document.getElementById('add-quantidade');
+  const addMinQuantidadeInput = document.getElementById('add-min-quantidade');
+  const cancelAddBtn = document.getElementById('cancel-add-btn');
+
+  // --- MODAL DE EDITAR ---
+  const editModalOverlay = document.getElementById('edit-modal-overlay');
   const editForm = document.getElementById('edit-form');
   const editIndexInput = document.getElementById('edit-index');
   const editNomeInput = document.getElementById('edit-nome');
   const editQuantidadeInput = document.getElementById('edit-quantidade');
-  const cancelBtn = document.getElementById('cancel-btn');
+  const editMinQuantidadeInput = document.getElementById('edit-min-quantidade');
+  const cancelEditBtn = document.getElementById('cancel-edit-btn');
   const deleteBtn = document.getElementById('delete-btn');
+  
+  // --- NOTIFICAÇÕES ---
+  const notificationsBtn = document.getElementById('notifications-btn');
+  const notificationsTab = document.getElementById('notifications-tab');
+  const notificationsList = document.getElementById('notifications-list');
+  const notificationsBadge = document.getElementById('notifications-badge');
+  const clearNotificationsBtn = document.getElementById('clear-notifications-btn');
 
   // --- ESTADO DA APLICAÇÃO ---
   let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+  let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
 
   // --- FUNÇÕES ---
-  function salvarProdutos() {
+
+  function salvarDados() {
     localStorage.setItem('produtos', JSON.stringify(produtos));
+    localStorage.setItem('notifications', JSON.stringify(notifications));
   }
 
-  function renderizarLista(filtro = '') {
+  function renderizarTudo() {
+    renderizarLista();
+    renderizarNotificacoes();
+  }
+
+  function checarEstoqueEAtualizarNotificacoes() {
+    notifications = []; // Limpa para reavaliar todos
+    produtos.forEach(produto => {
+      if (produto.quantidade < produto.minQuantidade) {
+        const notificationText = `<strong>${produto.nome}</strong> está com estoque baixo! (${produto.quantidade} de ${produto.minQuantidade})`;
+        if (!notifications.includes(notificationText)) {
+            notifications.push(notificationText);
+        }
+      }
+    });
+    salvarDados();
+    renderizarNotificacoes();
+  }
+
+  function renderizarNotificacoes() {
+    notificationsList.innerHTML = '';
+    if (notifications.length > 0) {
+      notifications.forEach(notificacao => {
+        const li = document.createElement('li');
+        li.innerHTML = notificacao;
+        notificationsList.appendChild(li);
+      });
+      notificationsBadge.textContent = notifications.length;
+      notificationsBadge.classList.remove('hidden');
+    } else {
+      notificationsList.innerHTML = '<li>Nenhuma notificação.</li>';
+      notificationsBadge.classList.add('hidden');
+    }
+  }
+
+  function renderizarLista() {
     listaProdutos.innerHTML = '';
-    const produtosFiltrados = produtos.filter(p => p.nome.toLowerCase().includes(filtro.toLowerCase()));
+    const filtro = filtroInput.value.toLowerCase();
+    const produtosFiltrados = produtos.filter(p => p.nome.toLowerCase().includes(filtro));
 
     if (produtosFiltrados.length === 0) {
-      const li = document.createElement('li');
-      li.style.justifyContent = 'center';
-      li.style.color = 'var(--text-light-color)';
-      li.textContent = filtro ? 'Nenhum produto encontrado.' : 'Seu estoque está vazio.';
-      listaProdutos.appendChild(li);
+      listaProdutos.innerHTML = `<li style="justify-content: center; color: var(--text-light-color);">${filtro ? 'Nenhum produto encontrado.' : 'Seu estoque está vazio.'}</li>`;
       return;
     }
 
@@ -48,10 +97,14 @@ if (location.pathname.includes('estoque.html')) {
     produtosFiltrados.forEach((produto) => {
       const originalIndex = produtos.findIndex(p => p === produto);
       const li = document.createElement('li');
+      if (produto.quantidade < produto.minQuantidade) {
+          li.classList.add('low-stock');
+      }
+
       li.innerHTML = `
         <div class="product-info">
           <span class="product-name">${produto.nome}</span>
-          <span class="product-quantity">${produto.quantidade} unidades</span>
+          <span class="product-quantity">${produto.quantidade} unidades (Mín: ${produto.minQuantidade})</span>
         </div>
         <div class="actions">
           <button class="btn-action btn-edit" title="Editar Item" data-index="${originalIndex}">${iconEdit}</button>
@@ -60,18 +113,10 @@ if (location.pathname.includes('estoque.html')) {
       listaProdutos.appendChild(li);
     });
   }
-
-  function openModal(index) {
-    const produto = produtos[index];
-    editIndexInput.value = index;
-    editNomeInput.value = produto.nome;
-    editQuantidadeInput.value = produto.quantidade;
-    modalOverlay.classList.remove('hidden');
-  }
-
-  function closeModal() {
-    modalOverlay.classList.add('hidden');
-  }
+  
+  // --- FUNÇÕES DE MODAL ---
+  const openModal = (overlay) => overlay.classList.remove('hidden');
+  const closeModal = (overlay) => overlay.classList.add('hidden');
 
   function logout() {
     localStorage.removeItem('usuarioLogado');
@@ -79,62 +124,100 @@ if (location.pathname.includes('estoque.html')) {
   }
 
   // --- EVENT LISTENERS ---
-  formProduto.addEventListener('submit', (e) => {
+
+  // Adicionar Produto
+  openAddModalBtn.addEventListener('click', () => openModal(addModalOverlay));
+  cancelAddBtn.addEventListener('click', () => closeModal(addModalOverlay));
+  addModalOverlay.addEventListener('click', (e) => {
+      if(e.target === addModalOverlay) closeModal(addModalOverlay);
+  });
+  
+  addForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const nome = nomeInput.value.trim();
-    const quantidade = parseInt(quantidadeInput.value);
-    if (nome && quantidade > 0) {
-      produtos.push({ nome, quantidade });
-      salvarProdutos();
-      renderizarLista(filtroInput.value);
-      formProduto.reset();
-      nomeInput.focus();
+    const nome = addNomeInput.value.trim();
+    const quantidade = parseInt(addQuantidadeInput.value, 10);
+    const minQuantidade = parseInt(addMinQuantidadeInput.value, 10);
+
+    if (nome && !isNaN(quantidade) && !isNaN(minQuantidade) && minQuantidade > 0) {
+      produtos.push({ nome, quantidade, minQuantidade });
+      checarEstoqueEAtualizarNotificacoes(); // Salva e renderiza tudo
+      renderizarTudo();
+      closeModal(addModalOverlay);
+      addForm.reset();
+    } else {
+        alert('Por favor, preencha todos os campos corretamente.');
     }
   });
 
+  // Editar e Deletar Produto
   listaProdutos.addEventListener('click', (e) => {
     const editButton = e.target.closest('.btn-edit');
     if (editButton) {
-      const index = parseInt(editButton.dataset.index);
-      openModal(index);
+      const index = parseInt(editButton.dataset.index, 10);
+      const produto = produtos[index];
+      editIndexInput.value = index;
+      editNomeInput.value = produto.nome;
+      editQuantidadeInput.value = produto.quantidade;
+      editMinQuantidadeInput.value = produto.minQuantidade;
+      openModal(editModalOverlay);
     }
   });
 
   editForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const index = parseInt(editIndexInput.value);
-    const novoNome = editNomeInput.value.trim();
-    const novaQuantidade = parseInt(editQuantidadeInput.value);
+    const index = parseInt(editIndexInput.value, 10);
+    const nome = editNomeInput.value.trim();
+    const quantidade = parseInt(editQuantidadeInput.value, 10);
+    const minQuantidade = parseInt(editMinQuantidadeInput.value, 10);
 
-    if (novoNome && novaQuantidade >= 0) {
-      produtos[index].nome = novoNome;
-      produtos[index].quantidade = novaQuantidade;
-      salvarProdutos();
-      renderizarLista(filtroInput.value);
-      closeModal();
+    if (nome && !isNaN(quantidade) && !isNaN(minQuantidade) && minQuantidade > 0) {
+        produtos[index] = { nome, quantidade, minQuantidade };
+        checarEstoqueEAtualizarNotificacoes();
+        renderizarTudo();
+        closeModal(editModalOverlay);
+    } else {
+        alert('Por favor, preencha todos os campos corretamente.');
     }
   });
-
+  
   deleteBtn.addEventListener('click', () => {
     if (confirm('Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.')) {
-      const index = parseInt(editIndexInput.value);
+      const index = parseInt(editIndexInput.value, 10);
       produtos.splice(index, 1);
-      salvarProdutos();
-      renderizarLista(filtroInput.value);
-      closeModal();
+      checarEstoqueEAtualizarNotificacoes();
+      renderizarTudo();
+      closeModal(editModalOverlay);
     }
   });
 
-  cancelBtn.addEventListener('click', closeModal);
-  modalOverlay.addEventListener('click', (e) => {
-    if (e.target === modalOverlay) {
-      closeModal();
-    }
+  cancelEditBtn.addEventListener('click', () => closeModal(editModalOverlay));
+  editModalOverlay.addEventListener('click', (e) => {
+    if(e.target === editModalOverlay) closeModal(editModalOverlay);
+  });
+  
+  // Notificações
+  notificationsBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Impede que o clique feche a aba imediatamente
+      notificationsTab.classList.toggle('hidden');
   });
 
-  filtroInput.addEventListener('input', () => renderizarLista(filtroInput.value));
+  clearNotificationsBtn.addEventListener('click', () => {
+      notifications = [];
+      salvarDados();
+      renderizarNotificacoes();
+  });
+  
+  // Fechar aba de notificações ao clicar fora
+  document.addEventListener('click', (e) => {
+      if (!notificationsTab.classList.contains('hidden') && !notificationsTab.contains(e.target) && e.target !== notificationsBtn) {
+          notificationsTab.classList.add('hidden');
+      }
+  });
+
+  // Outros
+  filtroInput.addEventListener('input', renderizarLista);
   logoutBtn.addEventListener('click', logout);
 
   // --- INICIALIZAÇÃO ---
-  renderizarLista();
+  document.addEventListener('DOMContentLoaded', renderizarTudo);
 }

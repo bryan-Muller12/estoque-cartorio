@@ -6,35 +6,38 @@
   <title>Controle de Estoque</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 
   <nav class="navbar">
     <div class="container">
       <h1 class="logo">Estoque Cartório📦</h1>
-      <button id="logout-btn" class="btn btn-danger">Sair</button>
+      <div class="navbar-actions">
+        <button id="notifications-btn" class="btn-icon">
+          <i class="fas fa-bell"></i>
+          <span id="notifications-badge" class="badge hidden">0</span>
+        </button>
+        <button id="logout-btn" class="btn btn-danger">Sair</button>
+      </div>
+    </div>
+    <div id="notifications-tab" class="notifications-tab hidden">
+        <h3>Notificações de Estoque Baixo</h3>
+        <ul id="notifications-list">
+          </ul>
+        <button id="clear-notifications-btn" class="btn-secondary btn-small">Limpar Notificações</button>
     </div>
   </nav>
 
   <main class="container">
     <div class="card">
       <div class="card-header">
-        <h2>Adicionar Produto</h2>
-      </div>
-      <form id="form-produto">
-        <div class="form-group-inline">
-          <input type="text" id="nome" placeholder="Nome do produto" required>
-          <input type="number" id="quantidade" placeholder="Qtd." required min="1">
-          <button type="submit" class="btn btn-primary">Adicionar</button>
-        </div>
-      </form>
-    </div>
-
-    <div class="card">
-      <div class="card-header">
         <h2>Meus Produtos</h2>
+        <button id="open-add-modal-btn" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Adicionar Produto
+        </button>
       </div>
-      <div class="form-group">
+      <div class="form-group-filter">
         <input type="text" id="filtro" placeholder="🔎 Filtrar produtos por nome...">
       </div>
       <ul id="lista-produtos">
@@ -42,26 +45,51 @@
     </div>
   </main>
 
+  <div id="add-modal-overlay" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h2>Adicionar Novo Produto</h2>
+      <form id="add-form">
+        <div class="form-group">
+          <label for="add-nome">Nome do Produto</label>
+          <input type="text" id="add-nome" required>
+        </div>
+        <div class="form-group">
+          <label for="add-quantidade">Quantidade Inicial</label>
+          <input type="number" id="add-quantidade" required min="0">
+        </div>
+        <div class="form-group">
+          <label for="add-min-quantidade">Avisar quando for menor que</label>
+          <input type="number" id="add-min-quantidade" placeholder="Ex: 5" required min="1">
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="cancel-add-btn" class="btn-secondary">Cancelar</button>
+          <button type="submit" class="btn-primary">Adicionar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="edit-modal-overlay" class="modal-overlay hidden">
     <div class="modal-content">
       <h2>Editar Produto</h2>
       <form id="edit-form">
         <input type="hidden" id="edit-index">
-        
         <div class="form-group">
           <label for="edit-nome">Nome do Produto</label>
           <input type="text" id="edit-nome" required>
         </div>
-        
         <div class="form-group">
           <label for="edit-quantidade">Quantidade</label>
           <input type="number" id="edit-quantidade" required min="0">
         </div>
-
+        <div class="form-group">
+            <label for="edit-min-quantidade">Avisar quando for menor que</label>
+            <input type="number" id="edit-min-quantidade" required min="1">
+          </div>
         <div class="modal-actions">
           <button type="button" id="delete-btn" class="btn-delete">Excluir Item</button>
           <div>
-            <button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button>
+            <button type="button" id="cancel-edit-btn" class="btn-secondary">Cancelar</button>
             <button type="submit" class="btn-primary">Salvar Alterações</button>
           </div>
         </div>

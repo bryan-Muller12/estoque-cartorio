@@ -5,7 +5,7 @@
   --danger-color: #ef4444;
   --danger-hover: #dc2626;
   --success-color: #22c55e;
-  --warning-color: #f59e0b;
+  --warning-color: #f97316; /* Laranja para alertas */
   --background-color: #f8fafc; /* Um cinza muito claro */
   --card-bg-color: #ffffff;
   --text-color: #1e293b; /* Um cinza-azulado escuro */
@@ -20,23 +20,22 @@
 body {
     position: relative;
     min-height: 100vh;
-    padding-bottom: 60px; /* --- ALTERAÇÃO --- Garante espaço para o footer */
+    padding-bottom: 80px; /* Garante espaço para o footer */
     background-color: var(--background-color);
+    font-family: var(--font-family);
 }
 
 
 body::before {
   content: '';
-  position: fixed; /* Fica fixo mesmo com a rolagem da página */
+  position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  /* Gradiente com a paleta de cor roxa do tema atual */
   background: linear-gradient(to top right, #4338ca, #6366f5);
-  /* A mágica que cria a forma curvada no canto */
   clip-path: ellipse(80% 80% at 110% 20%);
-  z-index: -1; /* Garante que o fundo fique atrás de todo o conteúdo */
+  z-index: -1;
 }
 
 .container {
@@ -46,14 +45,14 @@ body::before {
 }
 
 main.container {
-  /* --- ALTERAÇÃO --- Aumentei o espaço para afastar o card do header */
+  /* --- ALTERAÇÃO --- Aumentado para dar mais espaço do topo */
   padding-top: 120px; 
 }
 
-/* --- NAVBAR COM EFEITO "VIDRO FOSCO" --- */
+/* --- NAVBAR E NOTIFICAÇÕES --- */
 .navbar {
-  background-color: rgba(255, 255, 255, 0.7); /* Fundo semi-transparente */
-  backdrop-filter: blur(10px); /* O efeito de desfoque */
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border-color);
   padding: 15px 20px;
   position: fixed;
@@ -74,30 +73,111 @@ main.container {
   font-weight: 700;
   color: var(--primary-color);
   margin: 0;
-  letter-spacing: -1px; /* Letras um pouco mais juntas */
+  letter-spacing: -1px;
 }
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.btn-icon {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-light-color);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: all var(--transition-speed) ease;
+}
+
+.btn-icon:hover {
+    background-color: #f1f5f9;
+    color: var(--primary-color);
+}
+
+.badge {
+    background-color: var(--danger-color);
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    border: 2px solid white;
+}
+
+.notifications-tab {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 20px;
+    background: var(--card-bg-color);
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    width: 320px;
+    z-index: 1100;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.notifications-tab h3 {
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    color: var(--text-color);
+}
+
+#notifications-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 15px 0;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+#notifications-list li {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    color: var(--text-light-color);
+}
+#notifications-list li:last-child {
+    border-bottom: none;
+}
+#notifications-list li strong {
+    color: var(--warning-color);
+}
+
+.btn-small {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    width: 100%;
+}
+
 
 /* --- CARDS MODERNIZADOS --- */
 .card {
   background: var(--card-bg-color);
   border-radius: var(--border-radius);
   border: 1px solid var(--border-color);
-  /* --- ALTERAÇÃO --- Sombra um pouco mais forte para destacar */
   box-shadow: 0 5px 15px rgba(0,0,0,0.07);
   margin-bottom: 30px;
-  overflow: hidden;
-  transition: all var(--transition-speed) ease;
-}
-
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -4px var(--shadow-color);
+  overflow: hidden; /* Mudado de volta para hidden para manter o conteúdo dentro das bordas arredondadas */
 }
 
 .card-header {
-  background-color: transparent;
   padding: 20px 25px;
   border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .card-header h2 {
@@ -106,15 +186,9 @@ main.container {
   font-size: 1.25rem;
 }
 
-/* --- FORMULÁRIOS E BOTÕES COM NOVO VISUAL --- */
-form {
-  padding: 25px;
-}
-
-.form-group-inline {
-  display: flex;
-  gap: 15px;
-  align-items: center;
+/* --- FORMULÁRIOS E BOTÕES --- */
+.form-group-filter {
+    padding: 25px; /* Adicionado padding em cima para separar da linha do header */
 }
 
 input[type="text"],
@@ -126,6 +200,8 @@ input[type="number"] {
   font-size: 1rem;
   background-color: #f8fafc;
   transition: all var(--transition-speed) ease;
+  /* --- ALTERAÇÃO --- Garante que o input não saia do container */
+  box-sizing: border-box; 
 }
 
 input:focus {
@@ -135,7 +211,6 @@ input:focus {
   box-shadow: 0 0 0 3px var(--shadow-color);
 }
 
-/* Botão Principal */
 .btn-primary {
   background: linear-gradient(to right, #4f46e5, #6366f1);
   color: white;
@@ -147,13 +222,15 @@ input:focus {
   transition: all var(--transition-speed) ease;
   box-shadow: 0 4px 6px -1px var(--shadow-color);
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 7px 10px -3px var(--shadow-color);
 }
 
-/* Botão de Sair */
 .btn-danger {
   background-color: transparent;
   color: var(--danger-color);
@@ -173,24 +250,24 @@ input:focus {
 /* --- LISTA DE PRODUTOS REFINADA --- */
 #lista-produtos {
   list-style: none;
-  padding: 0 25px 25px;
+  padding: 0;
   margin: 0;
-  /* --- ALTERAÇÃO --- Adiciona scroll na lista */
-  max-height: 400px; /* Defina a altura máxima que desejar */
-  overflow-y: auto; /* Adiciona scroll vertical quando necessário */
+  max-height: 450px;
+  overflow-y: auto;
 }
 
 #lista-produtos li {
   display: flex;
   align-items: center;
-  padding: 20px 10px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 20px 25px;
+  border-top: 1px solid var(--border-color);
   transition: background-color var(--transition-speed) ease;
 }
 
-#lista-produtos li:last-child {
-  border-bottom: none;
+#lista-produtos li:first-child {
+    border-top: none; /* Remove a borda do primeiro item para não duplicar com a borda do filtro */
 }
+
 
 #lista-produtos li:hover {
     background-color: #f8fafc;
@@ -203,6 +280,9 @@ input:focus {
 #lista-produtos li .product-info .product-name {
   font-weight: 500;
   font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 #lista-produtos li .product-info .product-quantity {
@@ -215,12 +295,11 @@ input:focus {
     gap: 10px;
 }
 
-/* Botões de Ação com Ícones */
 .btn-action {
   background-color: #f1f5f9;
   color: var(--text-light-color);
   border: 1px solid var(--border-color);
-  border-radius: 50%; /* Círculos */
+  border-radius: 50%;
   width: 36px;
   height: 36px;
   display: flex;
@@ -236,20 +315,25 @@ input:focus {
   transform: scale(1.1);
 }
 
-.btn-action.btn-edit:hover {
-  background-color: var(--warning-color);
-  border-color: var(--warning-color);
-  color: white;
+/* ESTILO PARA ALERTA DE ESTOQUE BAIXO */
+.low-stock .product-name {
+    color: var(--warning-color);
+    font-weight: 700 !important;
 }
 
-/* --- ESTILOS DO MODAL DE EDIÇÃO --- */
+.low-stock .product-name::before {
+    content: "⚠️";
+    font-size: 1rem;
+}
+
+/* --- MODAIS --- */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(30, 41, 59, 0.6); /* Fundo escuro semi-transparente */
+  background-color: rgba(30, 41, 59, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -270,7 +354,7 @@ input:focus {
   border-radius: var(--border-radius);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 500px;
+  max-width: 450px;
   transform: scale(0.95);
   transition: transform 0.3s ease;
 }
@@ -325,38 +409,35 @@ input:focus {
   cursor: pointer;
   transition: all var(--transition-speed) ease;
   padding: 12px 0;
+  margin-right: auto; /* Joga o botão para a esquerda */
 }
 .modal-actions .btn-delete:hover {
   text-decoration: underline;
   opacity: 0.8;
 }
 
-/* --- ALTERAÇÃO --- Estilos para o novo Footer */
+/* --- FOOTER --- */
 .main-footer {
-    position: absolute;
+    position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
-   
-    backdrop-filter: blur(10px);
     text-align: center;
-    
+    padding: 15px 0;
     font-size: 0.9rem;
     color: var(--text-light-color);
+    backdrop-filter: blur(5px);
 }
 
 .main-footer a {
     color: var(--primary-color);
     text-decoration: none;
     font-weight: 500;
-  
 }
-
 .main-footer a:hover {
-    color: var(--primary-hover);
     text-decoration: underline;
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }

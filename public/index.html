@@ -41,36 +41,31 @@
     </div>
   </div>
 
-  <script>
-  document.getElementById('login-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const senha = document.getElementById('senha').value;
-    const erroEl = document.getElementById('login-erro');
-    erroEl.style.display = 'none'; // Esconde erro antigo
+<script>
+    // Lista de usuários hardcoded (como no início)
+    const usuarios = [
+      { email: 'teste@teste.com', senha: '1234' },
+      { email: 'admin@estoque.com', senha: 'admin' }
+    ];
 
-    try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, password: senha }),
-      });
+    document.getElementById('login-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const senha = document.getElementById('senha').value;
+      const erroEl = document.getElementById('login-erro');
 
-      const data = await response.json();
+      // Procura o usuário na lista
+      const usuarioValido = usuarios.find(u => u.email === email && u.senha === senha);
 
-      if (response.ok) {
-        // Salva o token de sessão no localStorage
-        localStorage.setItem('session_token', data.token);
+      if (usuarioValido) {
+        // Salva o email do usuário no localStorage para "lembrar" que ele está logado
+        localStorage.setItem('usuarioLogado', email);
         window.location.href = 'estoque.html';
       } else {
-        erroEl.textContent = data.message || 'E-mail ou senha incorretos.';
+        erroEl.textContent = 'Email ou senha incorretos.';
         erroEl.style.display = 'block';
       }
-    } catch (error) {
-      erroEl.textContent = 'Erro de conexão. Tente novamente.';
-      erroEl.style.display = 'block';
-    }
-  });
+    });
 </script>
 
 </body>

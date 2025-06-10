@@ -5,6 +5,7 @@
   --danger-color: #ef4444;
   --danger-hover: #dc2626;
   --success-color: #22c55e;
+  --success-hover: #16a34a;
   --warning-color: #f97316; /* Laranja para alertas */
   --background-color: #f8fafc; /* Um cinza muito claro */
   --card-bg-color: #ffffff;
@@ -45,7 +46,6 @@ body::before {
 }
 
 main.container {
-  /* --- ALTERAÇÃO --- Aumentado para dar mais espaço do topo */
   padding-top: 120px; 
 }
 
@@ -169,7 +169,7 @@ main.container {
   border: 1px solid var(--border-color);
   box-shadow: 0 5px 15px rgba(0,0,0,0.07);
   margin-bottom: 30px;
-  overflow: hidden; /* Mudado de volta para hidden para manter o conteúdo dentro das bordas arredondadas */
+  overflow: hidden;
 }
 
 .card-header {
@@ -188,7 +188,7 @@ main.container {
 
 /* --- FORMULÁRIOS E BOTÕES --- */
 .form-group-filter {
-    padding: 25px; /* Adicionado padding em cima para separar da linha do header */
+    padding: 25px;
 }
 
 input[type="text"],
@@ -200,7 +200,6 @@ input[type="number"] {
   font-size: 1rem;
   background-color: #f8fafc;
   transition: all var(--transition-speed) ease;
-  /* --- ALTERAÇÃO --- Garante que o input não saia do container */
   box-sizing: border-box; 
 }
 
@@ -259,13 +258,13 @@ input:focus {
 #lista-produtos li {
   display: flex;
   align-items: center;
-  padding: 20px 25px;
+  padding: 15px 25px; /* Altura um pouco menor para mais itens na tela */
   border-top: 1px solid var(--border-color);
   transition: background-color var(--transition-speed) ease;
 }
 
 #lista-produtos li:first-child {
-    border-top: none; /* Remove a borda do primeiro item para não duplicar com a borda do filtro */
+    border-top: none;
 }
 
 
@@ -309,11 +308,22 @@ input:focus {
   transition: all var(--transition-speed) ease;
 }
 .btn-action:hover {
-  background-color: var(--primary-color);
   color: white;
-  border-color: var(--primary-color);
+  border-color: transparent;
   transform: scale(1.1);
 }
+
+/* --- ALTERAÇÃO --- Estilos de hover para os novos botões */
+.btn-action.btn-quantity-decrease:hover {
+    background-color: var(--danger-color);
+}
+.btn-action.btn-quantity-increase:hover {
+    background-color: var(--success-color);
+}
+.btn-action.btn-edit:hover {
+    background-color: var(--primary-color);
+}
+
 
 /* ESTILO PARA ALERTA DE ESTOQUE BAIXO */
 .low-stock .product-name {
@@ -426,7 +436,9 @@ input:focus {
     padding: 15px 0;
     font-size: 0.9rem;
     color: var(--text-light-color);
+    background-color: rgba(248, 250, 252, 0.8);
     backdrop-filter: blur(5px);
+    border-top: 1px solid var(--border-color);
 }
 
 .main-footer a {

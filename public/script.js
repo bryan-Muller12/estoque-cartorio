@@ -92,22 +92,23 @@ if (document.body.id === 'page-estoque' || location.pathname.includes('estoque.h
       return;
     }
 
-    const iconEdit = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/></svg>`;
-
     produtosFiltrados.forEach((produto) => {
       const originalIndex = produtos.findIndex(p => p === produto);
       const li = document.createElement('li');
       if (produto.quantidade < produto.minQuantidade) {
           li.classList.add('low-stock');
       }
-
+      
+      // --- ALTERAÇÃO --- Adicionados botões de + e -
       li.innerHTML = `
         <div class="product-info">
           <span class="product-name">${produto.nome}</span>
           <span class="product-quantity">${produto.quantidade} unidades (Mín: ${produto.minQuantidade})</span>
         </div>
         <div class="actions">
-          <button class="btn-action btn-edit" title="Editar Item" data-index="${originalIndex}">${iconEdit}</button>
+          <button class="btn-action btn-quantity-decrease" title="Diminuir" data-index="${originalIndex}"><i class="fas fa-minus"></i></button>
+          <button class="btn-action btn-quantity-increase" title="Aumentar" data-index="${originalIndex}"><i class="fas fa-plus"></i></button>
+          <button class="btn-action btn-edit" title="Editar Item" data-index="${originalIndex}"><i class="fas fa-pencil-alt"></i></button>
         </div>
       `;
       listaProdutos.appendChild(li);
@@ -140,7 +141,7 @@ if (document.body.id === 'page-estoque' || location.pathname.includes('estoque.h
 
     if (nome && !isNaN(quantidade) && !isNaN(minQuantidade) && minQuantidade > 0) {
       produtos.push({ nome, quantidade, minQuantidade });
-      checarEstoqueEAtualizarNotificacoes(); // Salva e renderiza tudo
+      checarEstoqueEAtualizarNotificacoes();
       renderizarTudo();
       closeModal(addModalOverlay);
       addForm.reset();
@@ -149,20 +150,44 @@ if (document.body.id === 'page-estoque' || location.pathname.includes('estoque.h
     }
   });
 
-  // Editar e Deletar Produto
+  // --- ALTERAÇÃO --- Listener de Ações na Lista de Produtos
   listaProdutos.addEventListener('click', (e) => {
-    const editButton = e.target.closest('.btn-edit');
-    if (editButton) {
-      const index = parseInt(editButton.dataset.index, 10);
-      const produto = produtos[index];
-      editIndexInput.value = index;
-      editNomeInput.value = produto.nome;
-      editQuantidadeInput.value = produto.quantidade;
-      editMinQuantidadeInput.value = produto.minQuantidade;
-      openModal(editModalOverlay);
+    const decreaseBtn = e.target.closest('.btn-quantity-decrease');
+    const increaseBtn = e.target.closest('.btn-quantity-increase');
+    const editBtn = e.target.closest('.btn-edit');
+
+    // Diminuir Quantidade
+    if (decreaseBtn) {
+        const index = parseInt(decreaseBtn.dataset.index, 10);
+        if (produtos[index].quantidade > 0) {
+            produtos[index].quantidade--;
+            checarEstoqueEAtualizarNotificacoes();
+            renderizarTudo();
+        }
+    }
+
+    // Aumentar Quantidade
+    else if (increaseBtn) {
+        const index = parseInt(increaseBtn.dataset.index, 10);
+        produtos[index].quantidade++;
+        checarEstoqueEAtualizarNotificacoes();
+        renderizarTudo();
+    }
+
+    // Abrir Modal de Edição
+    else if (editBtn) {
+        const index = parseInt(editBtn.dataset.index, 10);
+        const produto = produtos[index];
+        editIndexInput.value = index;
+        editNomeInput.value = produto.nome;
+        editQuantidadeInput.value = produto.quantidade;
+        editMinQuantidadeInput.value = produto.minQuantidade;
+        openModal(editModalOverlay);
     }
   });
 
+
+  // Salvar Edição
   editForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const index = parseInt(editIndexInput.value, 10);
@@ -197,7 +222,7 @@ if (document.body.id === 'page-estoque' || location.pathname.includes('estoque.h
   
   // Notificações
   notificationsBtn.addEventListener('click', (e) => {
-      e.stopPropagation(); // Impede que o clique feche a aba imediatamente
+      e.stopPropagation();
       notificationsTab.classList.toggle('hidden');
   });
 
@@ -207,9 +232,8 @@ if (document.body.id === 'page-estoque' || location.pathname.includes('estoque.h
       renderizarNotificacoes();
   });
   
-  // Fechar aba de notificações ao clicar fora
   document.addEventListener('click', (e) => {
-      if (!notificationsTab.classList.contains('hidden') && !notificationsTab.contains(e.target) && e.target !== notificationsBtn) {
+      if (!notificationsTab.classList.contains('hidden') && !notificationsTab.contains(e.target) && !notificationsBtn.contains(e.target)) {
           notificationsTab.classList.add('hidden');
       }
   });

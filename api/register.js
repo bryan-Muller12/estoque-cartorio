@@ -1,9 +1,4 @@
-const { Pool } = require('pg');
-const bcrypt = require('bcryptjs');
-
-const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL,
-});
+import { supabase } from './lib/supabaseClient';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -13,21 +8,21 @@ export default async function handler(req, res) {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
+    return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
   }
 
-  try {
-    const salt = await bcrypt.genSalt(10);
-    const password_hash = await bcrypt.hash(password, salt);
+  // A função signUp do Supabase cuida de tudo!
+  const { data, error } = await supabase.auth.signUp({
+    email: email,
+    password: password,
+  });
 
-    const result = await pool.query(
-      'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email',
-      [email, password_hash]
-    );
-
-    res.status(201).json({ user: result.rows[0] });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error creating user', error: error.message });
+  if (error) {
+    console.error('Supabase error:', error.message);
+    return res.status(400).json({ error: error.message });
   }
+
+  // Por padrão, o Supabase pode exigir confirmação de e-mail.
+  // Se você desativou isso, o usuário já estará criado e logado.
+  res.status(200).json({ message: 'Registro bem-sucedido!', user: data.user });
 }

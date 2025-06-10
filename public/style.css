@@ -1,22 +1,42 @@
-/* --- GERAL E LAYOUT --- */
+/* --- GERAL E VARIÁVEIS DE DESIGN MODERNO --- */
 :root {
-  --primary-color: #007bff;
-  --primary-hover: #0056b3;
-  --danger-color: #dc3545;
-  --danger-hover: #c82333;
-  --light-gray: #f8f9fa;
-  --gray: #dee2e6;
-  --dark-gray: #343a40;
+  --primary-color: #4f46e5; /* Um índigo moderno */
+  --primary-hover: #4338ca;
+  --danger-color: #ef4444;
+  --danger-hover: #dc2626;
+  --success-color: #22c55e;
+  --warning-color: #f59e0b;
+  --background-color: #f8fafc; /* Um cinza muito claro */
+  --card-bg-color: #ffffff;
+  --text-color: #1e293b; /* Um cinza-azulado escuro */
+  --text-light-color: #64748b;
+  --border-color: #e2e8f0;
+  --shadow-color: rgba(79, 70, 229, 0.15);
   --font-family: 'Roboto', sans-serif;
-  --border-radius: 8px;
-  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --border-radius: 12px; /* Bordas mais arredondadas */
+  --transition-speed: 0.3s;
 }
 
 body {
-  font-family: var(--font-family);
-  background-color: var(--light-gray);
-  margin: 0;
-  color: var(--dark-gray);
+    position: relative;
+    min-height: 100vh;
+    padding-bottom: 60px; /* --- ALTERAÇÃO --- Garante espaço para o footer */
+    background-color: var(--background-color);
+}
+
+
+body::before {
+  content: '';
+  position: fixed; /* Fica fixo mesmo com a rolagem da página */
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  /* Gradiente com a paleta de cor roxa do tema atual */
+  background: linear-gradient(to top right, #4338ca, #6366f5);
+  /* A mágica que cria a forma curvada no canto */
+  clip-path: ellipse(80% 80% at 110% 20%);
+  z-index: -1; /* Garante que o fundo fique atrás de todo o conteúdo */
 }
 
 .container {
@@ -26,38 +46,16 @@ body {
 }
 
 main.container {
-    padding-top: 80px; /* Espaço para a navbar fixa */
+  /* --- ALTERAÇÃO --- Aumentei o espaço para afastar o card do header */
+  padding-top: 120px; 
 }
 
-.card {
-  background: white;
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
-  margin-bottom: 25px;
-  overflow: hidden;
-}
-
-.card-header {
-  background-color: #fff;
-  padding: 20px;
-  border-bottom: 1px solid var(--gray);
-}
-
-.card-header h2 {
-  margin: 0;
-  font-weight: 500;
-}
-
-.card-header p {
-    margin: 5px 0 0;
-    color: #6c757d;
-}
-
-/* --- NAVBAR --- */
+/* --- NAVBAR COM EFEITO "VIDRO FOSCO" --- */
 .navbar {
-  background-color: white;
-  box-shadow: var(--box-shadow);
-  padding: 0 20px;
+  background-color: rgba(255, 255, 255, 0.7); /* Fundo semi-transparente */
+  backdrop-filter: blur(10px); /* O efeito de desfoque */
+  border-bottom: 1px solid var(--border-color);
+  padding: 15px 20px;
   position: fixed;
   top: 0;
   left: 0;
@@ -72,123 +70,122 @@ main.container {
 }
 
 .navbar .logo {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: var(--primary-color);
   margin: 0;
+  letter-spacing: -1px; /* Letras um pouco mais juntas */
 }
 
+/* --- CARDS MODERNIZADOS --- */
+.card {
+  background: var(--card-bg-color);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  /* --- ALTERAÇÃO --- Sombra um pouco mais forte para destacar */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.07);
+  margin-bottom: 30px;
+  overflow: hidden;
+  transition: all var(--transition-speed) ease;
+}
 
-/* --- FORMULÁRIOS E BOTÕES --- */
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -4px var(--shadow-color);
+}
+
+.card-header {
+  background-color: transparent;
+  padding: 20px 25px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.card-header h2 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+/* --- FORMULÁRIOS E BOTÕES COM NOVO VISUAL --- */
 form {
-  padding: 20px;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
+  padding: 25px;
 }
 
 .form-group-inline {
   display: flex;
-  gap: 10px;
+  gap: 15px;
   align-items: center;
 }
 
 input[type="text"],
-input[type="number"],
-input[type="email"],
-input[type="password"] {
+input[type="number"] {
   width: 100%;
-  padding: 12px;
-  border: 1px solid var(--gray);
-  border-radius: 6px;
+  padding: 12px 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
   font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #f8fafc;
+  transition: all var(--transition-speed) ease;
 }
 
 input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  background-color: var(--card-bg-color);
+  box-shadow: 0 0 0 3px var(--shadow-color);
 }
 
-.btn {
-  padding: 12px 20px;
+/* Botão Principal */
+.btn-primary {
+  background: linear-gradient(to right, #4f46e5, #6366f1);
+  color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 1rem;
+  border-radius: 8px;
+  padding: 12px 25px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
-  text-align: center;
-  display: inline-block;
+  transition: all var(--transition-speed) ease;
+  box-shadow: 0 4px 6px -1px var(--shadow-color);
   white-space: nowrap;
 }
-
-.btn-primary {
-  background-color: var(--primary-color);
-  color: white;
-}
 .btn-primary:hover {
-  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 7px 10px -3px var(--shadow-color);
 }
 
+/* Botão de Sair */
 .btn-danger {
+  background-color: transparent;
+  color: var(--danger-color);
+  border: 1px solid var(--danger-color);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+.btn-danger:hover {
   background-color: var(--danger-color);
   color: white;
 }
-.btn-danger:hover {
-  background-color: var(--danger-hover);
-}
-
-/* --- PÁGINA DE LOGIN --- */
-#login-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-}
-
-#login-container .card {
-    width: 100%;
-    max-width: 400px;
-}
-
-#login-container button {
-    width: 100%;
-}
-
-.error-message {
-    color: var(--danger-color);
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    border-radius: 6px;
-    padding: 10px;
-    margin: 10px 20px;
-    display: none; /* Escondido por padrão */
-    text-align: center;
-}
 
 
-/* --- LISTA DE PRODUTOS --- */
+/* --- LISTA DE PRODUTOS REFINADA --- */
 #lista-produtos {
   list-style: none;
-  padding: 0 20px 20px;
+  padding: 0 25px 25px;
   margin: 0;
+  /* --- ALTERAÇÃO --- Adiciona scroll na lista */
+  max-height: 400px; /* Defina a altura máxima que desejar */
+  overflow-y: auto; /* Adiciona scroll vertical quando necessário */
 }
 
 #lista-produtos li {
   display: flex;
   align-items: center;
-  padding: 15px;
-  border-bottom: 1px solid var(--gray);
-  transition: background-color 0.2s;
+  padding: 20px 10px;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color var(--transition-speed) ease;
 }
 
 #lista-produtos li:last-child {
@@ -196,41 +193,170 @@ input:focus {
 }
 
 #lista-produtos li:hover {
-    background-color: #f1f3f5;
+    background-color: #f8fafc;
 }
 
 #lista-produtos li .product-info {
   flex-grow: 1;
+}
+
+#lista-produtos li .product-info .product-name {
+  font-weight: 500;
   font-size: 1.1rem;
 }
 
 #lista-produtos li .product-info .product-quantity {
-    color: #6c757d;
+    color: var(--text-light-color);
     font-size: 0.9rem;
-    display: block;
-    margin-top: 4px;
 }
 
 #lista-produtos li .actions {
     display: flex;
-    gap: 8px;
+    gap: 10px;
 }
 
-#lista-produtos .btn-action {
-  background-color: #6c757d;
+/* Botões de Ação com Ícones */
+.btn-action {
+  background-color: #f1f5f9;
+  color: var(--text-light-color);
+  border: 1px solid var(--border-color);
+  border-radius: 50%; /* Círculos */
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+.btn-action:hover {
+  background-color: var(--primary-color);
   color: white;
-  padding: 8px 12px;
-  font-size: 0.9rem;
+  border-color: var(--primary-color);
+  transform: scale(1.1);
 }
 
-#lista-produtos .btn-action:hover {
-  background-color: #5a6268;
+.btn-action.btn-edit:hover {
+  background-color: var(--warning-color);
+  border-color: var(--warning-color);
+  color: white;
 }
 
-#lista-produtos .btn-edit {
-  background-color: #ffc107;
-  color: var(--dark-gray);
+/* --- ESTILOS DO MODAL DE EDIÇÃO --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(30, 41, 59, 0.6); /* Fundo escuro semi-transparente */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
-#lista-produtos .btn-edit:hover {
-    background-color: #e0a800;
+
+.modal-overlay:not(.hidden) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  background: var(--card-bg-color);
+  padding: 30px;
+  border-radius: var(--border-radius);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+
+.modal-overlay:not(.hidden) .modal-content {
+  transform: scale(1);
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  text-align: center;
+  color: var(--text-color);
+}
+
+.modal-content .form-group {
+  margin-bottom: 20px;
+}
+.modal-content .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+  gap: 10px;
+}
+
+.modal-actions .btn-secondary {
+  background-color: #e2e8f0;
+  color: #475569;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+.modal-actions .btn-secondary:hover {
+  background-color: #cbd5e1;
+}
+
+.modal-actions .btn-delete {
+  background-color: transparent;
+  color: var(--danger-color);
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  padding: 12px 0;
+}
+.modal-actions .btn-delete:hover {
+  text-decoration: underline;
+  opacity: 0.8;
+}
+
+/* --- ALTERAÇÃO --- Estilos para o novo Footer */
+.main-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+   
+    backdrop-filter: blur(10px);
+    text-align: center;
+    
+    font-size: 0.9rem;
+    color: var(--text-light-color);
+}
+
+.main-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+  
+}
+
+.main-footer a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.hidden {
+  display: none;
 }

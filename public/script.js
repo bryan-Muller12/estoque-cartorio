@@ -1,16 +1,16 @@
 // Garante que o código só rode na página de estoque
 if (document.body.id === 'page-estoque' || location.pathname.includes('estoque.html')) {
-  // --- VERIFICAÇÃO DE LOGIN ---
+  // --- VERIFICAÇÃO DE LOGIN (MANTIDA) ---
   if (!localStorage.getItem('usuarioLogado')) {
     window.location.href = 'index.html';
   }
 
-  // --- ELEMENTOS DO DOM ---
+  // --- ELEMENTOS DO DOM (MANTIDOS) ---
   const filtroInput = document.getElementById('filtro');
   const listaProdutos = document.getElementById('lista-produtos');
   const logoutBtn = document.getElementById('logout-btn');
 
-  // --- MODAL DE ADICIONAR ---
+  // --- MODAIS (MANTIDOS) ---
   const openAddModalBtn = document.getElementById('open-add-modal-btn');
   const addModalOverlay = document.getElementById('add-modal-overlay');
   const addForm = document.getElementById('add-form');
@@ -19,17 +19,16 @@ if (document.body.id === 'page-estoque' || location.pathname.includes('estoque.h
   const addMinQuantidadeInput = document.getElementById('add-min-quantidade');
   const cancelAddBtn = document.getElementById('cancel-add-btn');
 
-  // --- MODAL DE EDITAR ---
   const editModalOverlay = document.getElementById('edit-modal-overlay');
   const editForm = document.getElementById('edit-form');
-  const editIndexInput = document.getElementById('edit-index');
+  const editIdInput = document.getElementById('edit-id'); // ALTERADO: de 'edit-index' para 'edit-id'
   const editNomeInput = document.getElementById('edit-nome');
   const editQuantidadeInput = document.getElementById('edit-quantidade');
   const editMinQuantidadeInput = document.getElementById('edit-min-quantidade');
   const cancelEditBtn = document.getElementById('cancel-edit-btn');
   const deleteBtn = document.getElementById('delete-btn');
   
-  // --- NOTIFICAÇÕES ---
+  // --- NOTIFICAÇÕES (LÓGICA ALTERADA) ---
   const notificationsBtn = document.getElementById('notifications-btn');
   const notificationsTab = document.getElementById('notifications-tab');
   const notificationsList = document.getElementById('notifications-list');
@@ -37,36 +36,23 @@ if (document.body.id === 'page-estoque' || location.pathname.includes('estoque.h
   const clearNotificationsBtn = document.getElementById('clear-notifications-btn');
 
   // --- ESTADO DA APLICAÇÃO ---
-  let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
-  let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+  let produtos = []; // Agora começa vazio e é preenchido pela API
+  let notifications = []; // As notificações agora são geradas a partir dos dados da API
 
   // --- FUNÇÕES ---
 
-  function salvarDados() {
-    localStorage.setItem('produtos', JSON.stringify(produtos));
-    localStorage.setItem('notifications', JSON.stringify(notifications));
-  }
-
-  function renderizarTudo() {
-    renderizarLista();
-    renderizarNotificacoes();
-  }
-
-  function checarEstoqueEAtualizarNotificacoes() {
-    notifications = []; // Limpa para reavaliar todos
-    produtos.forEach(produto => {
-      if (produto.quantidade < produto.minQuantidade) {
-        const notificationText = `<strong>${produto.nome}</strong> está com estoque baixo! (${produto.quantidade} de ${produto.minQuantidade})`;
-        if (!notifications.includes(notificationText)) {
-            notifications.push(notificationText);
-        }
-      }
-    });
-    salvarDados();
-    renderizarNotificacoes();
-  }
+  // NOVO PADRÃO: Em vez de salvar no localStorage, qualquer alteração chama a API
+  // e depois recarrega os dados do servidor para garantir que a tela esteja sempre atualizada.
 
   function renderizarNotificacoes() {
+    notifications = []; // Limpa para reavaliar
+    produtos.forEach(produto => {
+      if (produto.quantidade < produto.min_quantidade) {
+        const notificationText = `<strong>${produto.nome}</strong> está com estoque baixo! (${produto.quantidade} de ${produto.min_quantidade})`;
+        notifications.push(notificationText);
+      }
+    });
+
     notificationsList.innerHTML = '';
     if (notifications.length > 0) {
       notifications.forEach(notificacao => {
@@ -93,31 +79,49 @@ if (document.body.id === 'page-estoque' || location.pathname.includes('estoque.h
     }
 
     produtosFiltrados.forEach((produto) => {
-      const originalIndex = produtos.findIndex(p => p === produto);
       const li = document.createElement('li');
-      if (produto.quantidade < produto.minQuantidade) {
+      if (produto.quantidade < produto.min_quantidade) {
           li.classList.add('low-stock');
       }
       
-      // --- ALTERAÇÃO --- Adicionados botões de + e -
+      // ALTERADO: os botões agora usam o 'produto.id' do banco de dados
       li.innerHTML = `
         <div class="product-info">
           <span class="product-name">${produto.nome}</span>
-          <span class="product-quantity">${produto.quantidade} unidades (Mín: ${produto.minQuantidade})</span>
+          <span class="product-quantity">${produto.quantidade} unidades (Mín: ${produto.min_quantidade})</span>
         </div>
         <div class="actions">
-          <button class="btn-action btn-quantity-decrease" title="Diminuir" data-index="${originalIndex}"><i class="fas fa-minus"></i></button>
-          <button class="btn-action btn-quantity-increase" title="Aumentar" data-index="${originalIndex}"><i class="fas fa-plus"></i></button>
-          <button class="btn-action btn-edit" title="Editar Item" data-index="${originalIndex}"><i class="fas fa-pencil-alt"></i></button>
+          <button class="btn-action btn-quantity-decrease" title="Diminuir" data-id="${produto.id}"><i class="fas fa-minus"></i></button>
+          <button class="btn-action btn-quantity-increase" title="Aumentar" data-id="${produto.id}"><i class="fas fa-plus"></i></button>
+          <button class="btn-action btn-edit" title="Editar Item" data-id="${produto.id}"><i class="fas fa-pencil-alt"></i></button>
         </div>
       `;
       listaProdutos.appendChild(li);
     });
+    renderizarNotificacoes(); // Atualiza as notificações com base na lista renderizada
+  }
+
+  // MUDANÇA PRINCIPAL 1: Função para carregar os dados da API
+  async function carregarProdutos() {
+    try {
+        const response = await fetch('/api/produtos');
+        if (!response.ok) throw new Error('Falha ao buscar dados');
+        produtos = await response.json(); // Preenche o array de produtos com os dados do banco
+        renderizarLista();
+    } catch (error) {
+        console.error("Erro ao carregar produtos:", error);
+        alert('Não foi possível conectar ao servidor.');
+    }
   }
   
-  // --- FUNÇÕES DE MODAL ---
+  // --- FUNÇÕES DE MODAL (MANTIDAS) ---
   const openModal = (overlay) => overlay.classList.remove('hidden');
-  const closeModal = (overlay) => overlay.classList.add('hidden');
+  const closeModal = (overlay) => {
+    overlay.classList.add('hidden');
+    // Limpa os formulários ao fechar
+    addForm.reset();
+    editForm.reset();
+  }
 
   function logout() {
     localStorage.removeItem('usuarioLogado');
@@ -126,101 +130,136 @@ if (document.body.id === 'page-estoque' || location.pathname.includes('estoque.h
 
   // --- EVENT LISTENERS ---
 
-  // Adicionar Produto
+  // MUDANÇA PRINCIPAL 2: Adicionar Produto agora chama a API
+  addForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const novoProduto = {
+      nome: addNomeInput.value.trim(),
+      quantidade: parseInt(addQuantidadeInput.value, 10),
+      minQuantidade: parseInt(addMinQuantidadeInput.value, 10)
+    };
+
+    if (novoProduto.nome && !isNaN(novoProduto.quantidade) && !isNaN(novoProduto.minQuantidade) && novoProduto.minQuantidade > 0) {
+      try {
+        const response = await fetch('/api/produtos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(novoProduto)
+        });
+        if (!response.ok) throw new Error('Falha ao adicionar produto');
+        
+        await carregarProdutos(); // Recarrega a lista do servidor
+        closeModal(addModalOverlay);
+      } catch (error) {
+        console.error("Erro:", error);
+        alert("Não foi possível adicionar o produto.");
+      }
+    } else {
+        alert('Por favor, preencha todos os campos corretamente.');
+    }
+  });
+
+  // MUDANÇA PRINCIPAL 3: Ações na lista (aumentar, diminuir, editar)
+  listaProdutos.addEventListener('click', async (e) => {
+    const targetButton = e.target.closest('.btn-action');
+    if (!targetButton) return;
+
+    const id = targetButton.dataset.id;
+    const produto = produtos.find(p => p.id == id);
+    if (!produto) return;
+
+    // Aumentar/Diminuir Quantidade
+    if (targetButton.classList.contains('btn-quantity-decrease') || targetButton.classList.contains('btn-quantity-increase')) {
+      const novaQuantidade = targetButton.classList.contains('btn-quantity-increase') 
+        ? produto.quantidade + 1 
+        : Math.max(0, produto.quantidade - 1);
+
+      try {
+          const response = await fetch(`/api/produtos?id=${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ...produto, quantidade: novaQuantidade }) // Envia o produto inteiro atualizado
+          });
+          if (!response.ok) throw new Error('Falha ao atualizar quantidade');
+          await carregarProdutos(); // Recarrega a lista
+      } catch (error) {
+          console.error("Erro:", error);
+          alert("Não foi possível atualizar a quantidade.");
+      }
+    }
+    
+    // Abrir Modal de Edição
+    else if (targetButton.classList.contains('btn-edit')) {
+        editIdInput.value = produto.id;
+        editNomeInput.value = produto.nome;
+        editQuantidadeInput.value = produto.quantidade;
+        editMinQuantidadeInput.value = produto.min_quantidade;
+        openModal(editModalOverlay);
+    }
+  });
+
+
+  // MUDANÇA PRINCIPAL 4: Salvar Edição
+  editForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = editIdInput.value;
+    const produtoAtualizado = {
+        nome: editNomeInput.value.trim(),
+        quantidade: parseInt(editQuantidadeInput.value, 10),
+        min_quantidade: parseInt(editMinQuantidadeInput.value, 10)
+    };
+
+    if (produtoAtualizado.nome && !isNaN(produtoAtualizado.quantidade) && !isNaN(produtoAtualizado.min_quantidade)) {
+        try {
+            const response = await fetch(`/api/produtos?id=${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(produtoAtualizado)
+            });
+            if (!response.ok) throw new Error('Falha ao salvar alterações');
+
+            await carregarProdutos();
+            closeModal(editModalOverlay);
+        } catch (error) {
+            console.error("Erro:", error);
+            alert("Não foi possível salvar as alterações.");
+        }
+    } else {
+        alert('Por favor, preencha todos os campos corretamente.');
+    }
+  });
+  
+  // MUDANÇA PRINCIPAL 5: Deletar Item
+  deleteBtn.addEventListener('click', async () => {
+    if (confirm('Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.')) {
+      const id = editIdInput.value;
+      try {
+        const response = await fetch(`/api/produtos?id=${id}`, {
+            method: 'DELETE'
+        });
+        if (!response.ok) throw new Error('Falha ao excluir produto');
+        
+        await carregarProdutos();
+        closeModal(editModalOverlay);
+      } catch (error) {
+        console.error("Erro:", error);
+        alert("Não foi possível excluir o produto.");
+      }
+    }
+  });
+
+  // --- OUTROS LISTENERS (SEM MUDANÇAS DRÁSTICAS) ---
   openAddModalBtn.addEventListener('click', () => openModal(addModalOverlay));
   cancelAddBtn.addEventListener('click', () => closeModal(addModalOverlay));
   addModalOverlay.addEventListener('click', (e) => {
       if(e.target === addModalOverlay) closeModal(addModalOverlay);
   });
   
-  addForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const nome = addNomeInput.value.trim();
-    const quantidade = parseInt(addQuantidadeInput.value, 10);
-    const minQuantidade = parseInt(addMinQuantidadeInput.value, 10);
-
-    if (nome && !isNaN(quantidade) && !isNaN(minQuantidade) && minQuantidade > 0) {
-      produtos.push({ nome, quantidade, minQuantidade });
-      checarEstoqueEAtualizarNotificacoes();
-      renderizarTudo();
-      closeModal(addModalOverlay);
-      addForm.reset();
-    } else {
-        alert('Por favor, preencha todos os campos corretamente.');
-    }
-  });
-
-  // --- ALTERAÇÃO --- Listener de Ações na Lista de Produtos
-  listaProdutos.addEventListener('click', (e) => {
-    const decreaseBtn = e.target.closest('.btn-quantity-decrease');
-    const increaseBtn = e.target.closest('.btn-quantity-increase');
-    const editBtn = e.target.closest('.btn-edit');
-
-    // Diminuir Quantidade
-    if (decreaseBtn) {
-        const index = parseInt(decreaseBtn.dataset.index, 10);
-        if (produtos[index].quantidade > 0) {
-            produtos[index].quantidade--;
-            checarEstoqueEAtualizarNotificacoes();
-            renderizarTudo();
-        }
-    }
-
-    // Aumentar Quantidade
-    else if (increaseBtn) {
-        const index = parseInt(increaseBtn.dataset.index, 10);
-        produtos[index].quantidade++;
-        checarEstoqueEAtualizarNotificacoes();
-        renderizarTudo();
-    }
-
-    // Abrir Modal de Edição
-    else if (editBtn) {
-        const index = parseInt(editBtn.dataset.index, 10);
-        const produto = produtos[index];
-        editIndexInput.value = index;
-        editNomeInput.value = produto.nome;
-        editQuantidadeInput.value = produto.quantidade;
-        editMinQuantidadeInput.value = produto.minQuantidade;
-        openModal(editModalOverlay);
-    }
-  });
-
-
-  // Salvar Edição
-  editForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const index = parseInt(editIndexInput.value, 10);
-    const nome = editNomeInput.value.trim();
-    const quantidade = parseInt(editQuantidadeInput.value, 10);
-    const minQuantidade = parseInt(editMinQuantidadeInput.value, 10);
-
-    if (nome && !isNaN(quantidade) && !isNaN(minQuantidade) && minQuantidade > 0) {
-        produtos[index] = { nome, quantidade, minQuantidade };
-        checarEstoqueEAtualizarNotificacoes();
-        renderizarTudo();
-        closeModal(editModalOverlay);
-    } else {
-        alert('Por favor, preencha todos os campos corretamente.');
-    }
-  });
-  
-  deleteBtn.addEventListener('click', () => {
-    if (confirm('Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.')) {
-      const index = parseInt(editIndexInput.value, 10);
-      produtos.splice(index, 1);
-      checarEstoqueEAtualizarNotificacoes();
-      renderizarTudo();
-      closeModal(editModalOverlay);
-    }
-  });
-
   cancelEditBtn.addEventListener('click', () => closeModal(editModalOverlay));
   editModalOverlay.addEventListener('click', (e) => {
     if(e.target === editModalOverlay) closeModal(editModalOverlay);
   });
-  
-  // Notificações
+
   notificationsBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       notificationsTab.classList.toggle('hidden');
@@ -228,8 +267,8 @@ if (document.body.id === 'page-estoque' || location.pathname.includes('estoque.h
 
   clearNotificationsBtn.addEventListener('click', () => {
       notifications = [];
-      salvarDados();
       renderizarNotificacoes();
+      // Nota: Esta ação é apenas visual no frontend agora.
   });
   
   document.addEventListener('click', (e) => {
@@ -238,10 +277,10 @@ if (document.body.id === 'page-estoque' || location.pathname.includes('estoque.h
       }
   });
 
-  // Outros
   filtroInput.addEventListener('input', renderizarLista);
   logoutBtn.addEventListener('click', logout);
 
   // --- INICIALIZAÇÃO ---
-  document.addEventListener('DOMContentLoaded', renderizarTudo);
+  // A mágica começa aqui: ao carregar a página, busca os dados da API.
+  document.addEventListener('DOMContentLoaded', carregarProdutos);
 }

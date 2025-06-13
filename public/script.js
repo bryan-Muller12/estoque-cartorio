@@ -34,6 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const listaProdutos = document.getElementById('lista-produtos');
     const logoutBtn = document.getElementById('logout-btn');
     const loadingState = document.getElementById('loading-state');
+    const loadingText = document.getElementById('loading-text');
+    const retryBtn = document.getElementById('retry-btn');
     
     const openAddModalBtn = document.getElementById('open-add-modal-btn');
     const addModalOverlay = document.getElementById('add-modal-overlay');
@@ -59,9 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const notificationsList = document.getElementById('notifications-list');
     const notificationsBadge = document.getElementById('notifications-badge');
     const clearNotificationsBtn = document.getElementById('clear-notifications-btn');
-
-    const chartCanvas = document.getElementById('estoque-chart');
-    let estoqueChart = null;
     
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
 
@@ -94,42 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.disabled = false;
             btn.innerHTML = originalText;
         }
-    }
-
-    function renderizarGrafico() {
-        if (estoqueChart) {
-            estoqueChart.destroy();
-        }
-
-        const ctx = chartCanvas.getContext('2d');
-        const produtosParaGrafico = [...produtos].sort((a,b) => b.quantidade - a.quantidade).slice(0, 10);
-
-        estoqueChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: produtosParaGrafico.map(p => p.nome),
-                datasets: [{
-                    label: 'Quantidade',
-                    data: produtosParaGrafico.map(p => p.quantidade),
-                    backgroundColor: 'rgba(79, 70, 229, 0.6)',
-                    borderColor: 'rgba(79, 70, 229, 1)',
-                    borderWidth: 1
-                }, {
-                    type: 'line',
-                    label: 'Mínimo',
-                    data: produtosParaGrafico.map(p => p.min_quantidade),
-                    borderColor: 'rgba(249, 115, 22, 1)',
-                    backgroundColor: 'rgba(249, 115, 22, 0.2)',
-                    fill: false,
-                    tension: 0.1
-                }]
-            },
-            options: {
-                scales: { y: { beginAtZero: true } },
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
     }
 
     function renderizarNotificacoes() {
@@ -166,11 +129,22 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'qtd-desc': produtosFiltrados.sort((a, b) => b.quantidade - a.quantidade); break;
         }
 
-        if (produtosFiltrados.length === 0) {
-            loadingState.textContent = filtro ? 'Nenhum produto encontrado.' : 'Seu estoque está vazio.';
-            loadingState.classList.remove('hidden');
+        if (produtosFiltrados.length === 0 && produtos.length > 0) {
+            const emptyLi = document.createElement('li');
+            emptyLi.id = 'loading-state';
+            emptyLi.innerHTML = `<span id="loading-text">Nenhum produto encontrado.</span>`;
+            listaProdutos.appendChild(emptyLi);
             return;
         }
+
+        if (produtos.length === 0) {
+            loadingState.classList.remove('hidden');
+            loadingText.textContent = 'Seu estoque está vazio.';
+            retryBtn.classList.add('hidden');
+            return;
+        }
+
+        loadingState.classList.add('hidden');
 
         produtosFiltrados.forEach((produto) => {
             const li = document.createElement('li');
@@ -192,15 +166,16 @@ document.addEventListener('DOMContentLoaded', () => {
             listaProdutos.appendChild(li);
         });
         
-        loadingState.classList.add('hidden');
         renderizarNotificacoes();
-        renderizarGrafico();
     }
 
     async function carregarProdutos() {
-        loadingState.textContent = 'Carregando produtos...';
         loadingState.classList.remove('hidden');
+        loadingText.textContent = 'Carregando produtos...';
+        retryBtn.classList.add('hidden');
         listaProdutos.innerHTML = '';
+        listaProdutos.appendChild(loadingState);
+
         try {
             const response = await fetch('/api/produtos');
             if (!response.ok) throw new Error('Falha ao buscar dados');
@@ -208,7 +183,8 @@ document.addEventListener('DOMContentLoaded', () => {
             renderizarLista();
         } catch (error) {
             showToast('Não foi possível conectar ao servidor.', 'error');
-            loadingState.textContent = 'Falha ao carregar produtos.';
+            loadingText.textContent = 'Falha ao carregar produtos.';
+            retryBtn.classList.remove('hidden');
         }
     }
   
@@ -236,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
             icon.classList.add('fa-moon');
         }
     }
-
+    
     addForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const originalBtnText = addSubmitBtn.innerHTML;
@@ -382,7 +358,8 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('theme', novoTema);
         aplicarTema(novoTema);
     });
-
+    
+    retryBtn.addEventListener('click', carregarProdutos);
     filtroInput.addEventListener('input', renderizarLista);
     sortSelect.addEventListener('change', renderizarLista);
     logoutBtn.addEventListener('click', logout);

@@ -15,7 +15,10 @@
     <div class="container">
       <h1 class="logo">Estoque Cartório📦</h1>
       <div class="navbar-actions">
-        <button id="notifications-btn" class="btn-icon">
+        <button id="theme-toggle-btn" class="btn-icon" title="Mudar tema">
+            <i class="fas fa-moon"></i>
+        </button>
+        <button id="notifications-btn" class="btn-icon" title="Notificações">
           <i class="fas fa-bell"></i>
           <span id="notifications-badge" class="badge hidden">0</span>
         </button>
@@ -31,22 +34,6 @@
   </nav>
 
   <main class="container">
-
-    <section class="dashboard">
-      <div class="dashboard-card">
-        <h3>Total de Itens</h3>
-        <p id="total-itens-valor">0</p>
-      </div>
-      <div class="dashboard-card">
-        <h3>Itens com Estoque Baixo</h3>
-        <p id="baixo-estoque-valor">0</p>
-      </div>
-      <div class="dashboard-card">
-        <h3>Total de Unidades</h3>
-        <p id="total-unidades-valor">0</p>
-      </div>
-    </section>
-
     <div class="card">
       <div class="card-header">
         <h2>Meus Produtos</h2>
@@ -78,7 +65,6 @@
             <canvas id="estoque-chart"></canvas>
         </div>
     </div>
-
   </main>
 
   <div id="add-modal-overlay" class="modal-overlay hidden">

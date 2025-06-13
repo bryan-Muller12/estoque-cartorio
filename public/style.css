@@ -1,30 +1,41 @@
-/* --- GERAL E VARIÁVEIS DE DESIGN MODERNO --- */
 :root {
-  --primary-color: #4f46e5; /* Um índigo moderno */
+  --primary-color: #4f46e5;
   --primary-hover: #4338ca;
   --danger-color: #ef4444;
   --danger-hover: #dc2626;
   --success-color: #22c55e;
   --success-hover: #16a34a;
-  --warning-color: #f97316; /* Laranja para alertas */
-  --background-color: #f8fafc; /* Um cinza muito claro */
+  --warning-color: #f97316;
+  --background-color: #f8fafc;
   --card-bg-color: #ffffff;
-  --text-color: #1e293b; /* Um cinza-azulado escuro */
+  --text-color: #1e293b;
   --text-light-color: #64748b;
   --border-color: #e2e8f0;
   --shadow-color: rgba(79, 70, 229, 0.15);
   --font-family: 'Roboto', sans-serif;
-  --border-radius: 12px; /* Bordas mais arredondadas */
+  --border-radius: 12px;
   --transition-speed: 0.3s;
+}
+
+body.dark-mode {
+  --background-color: #0f172a;
+  --card-bg-color: #1e293b;
+  --text-color: #f8fafc;
+  --text-light-color: #94a3b8;
+  --border-color: #334155;
+  --shadow-color: rgba(79, 70, 229, 0.2);
 }
 
 body {
     position: relative;
     min-height: 100vh;
-    padding-bottom: 80px; /* Garante espaço para o footer */
+    padding-bottom: 80px;
     background-color: var(--background-color);
     font-family: var(--font-family);
+    color: var(--text-color);
+    transition: background-color var(--transition-speed), color var(--transition-speed);
 }
+
 
 body::before {
   content: '';
@@ -36,6 +47,11 @@ body::before {
   background: linear-gradient(to top right, #4338ca, #6366f5);
   clip-path: ellipse(80% 80% at 110% 20%);
   z-index: -1;
+  opacity: 0.8;
+}
+
+body.dark-mode::before {
+    opacity: 0.4;
 }
 
 .container {
@@ -48,7 +64,6 @@ main.container {
   padding-top: 120px; 
 }
 
-/* --- NAVBAR E NOTIFICAÇÕES --- */
 .navbar {
   background-color: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(10px);
@@ -59,6 +74,11 @@ main.container {
   left: 0;
   width: 100%;
   z-index: 1000;
+  transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+body.dark-mode .navbar {
+    background-color: rgba(30, 41, 59, 0.7);
 }
 
 .navbar .container {
@@ -101,6 +121,10 @@ main.container {
     color: var(--primary-color);
 }
 
+body.dark-mode .btn-icon:hover {
+    background-color: #334155;
+}
+
 .badge {
     background-color: var(--danger-color);
     color: white;
@@ -111,7 +135,7 @@ main.container {
     position: absolute;
     top: -5px;
     right: -5px;
-    border: 2px solid white;
+    border: 2px solid var(--card-bg-color);
 }
 
 .notifications-tab {
@@ -160,39 +184,6 @@ main.container {
     width: 100%;
 }
 
-
-/* --- NOVO: DASHBOARD --- */
-.dashboard {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.dashboard-card {
-  background: var(--card-bg-color);
-  border-radius: var(--border-radius);
-  padding: 20px;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-  text-align: center;
-}
-
-.dashboard-card h3 {
-  margin: 0 0 10px 0;
-  font-size: 1rem;
-  color: var(--text-light-color);
-  font-weight: 500;
-}
-
-.dashboard-card p {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--primary-color);
-}
-
-/* --- CARDS MODERNIZADOS --- */
 .card {
   background: var(--card-bg-color);
   border-radius: var(--border-radius);
@@ -200,6 +191,7 @@ main.container {
   box-shadow: 0 5px 15px rgba(0,0,0,0.07);
   margin-bottom: 30px;
   overflow: hidden;
+  transition: background-color var(--transition-speed), border-color var(--transition-speed);
 }
 
 .card-header {
@@ -218,10 +210,10 @@ main.container {
 
 .card-body {
     padding: 25px;
+    position: relative;
+    height: 400px;
 }
 
-/* --- FORMULÁRIOS E BOTÕES --- */
-/* ATUALIZADO: para suportar múltiplos elementos */
 .form-group-filter {
     padding: 25px;
     display: flex;
@@ -237,7 +229,7 @@ select {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 1rem;
-  background-color: #f8fafc;
+  background-color: var(--background-color);
   transition: all var(--transition-speed) ease;
   box-sizing: border-box; 
   color: var(--text-color);
@@ -253,6 +245,7 @@ input:focus, select:focus {
 #sort-select {
     max-width: 250px;
 }
+
 
 .btn-primary {
   background: linear-gradient(to right, #4f46e5, #6366f1);
@@ -294,7 +287,6 @@ input:focus, select:focus {
 }
 
 
-/* --- LISTA DE PRODUTOS REFINADA --- */
 #lista-produtos {
   list-style: none;
   padding: 0;
@@ -306,7 +298,7 @@ input:focus, select:focus {
 #lista-produtos li {
   display: flex;
   align-items: center;
-  padding: 15px 25px; /* Altura um pouco menor para mais itens na tela */
+  padding: 15px 25px;
   border-top: 1px solid var(--border-color);
   transition: background-color var(--transition-speed) ease;
 }
@@ -317,7 +309,7 @@ input:focus, select:focus {
 
 
 #lista-produtos li:hover {
-    background-color: #f8fafc;
+    background-color: rgba(79, 70, 229, 0.05);
 }
 
 #lista-produtos li .product-info {
@@ -355,13 +347,19 @@ input:focus, select:focus {
   cursor: pointer;
   transition: all var(--transition-speed) ease;
 }
+
+body.dark-mode .btn-action {
+    background-color: #334155;
+    border-color: #475569;
+}
+
+
 .btn-action:hover {
   color: white;
   border-color: transparent;
   transform: scale(1.1);
 }
 
-/* --- ALTERAÇÃO --- Estilos de hover para os novos botões */
 .btn-action.btn-quantity-decrease:hover {
     background-color: var(--danger-color);
 }
@@ -372,8 +370,6 @@ input:focus, select:focus {
     background-color: var(--primary-color);
 }
 
-
-/* ESTILO PARA ALERTA DE ESTOQUE BAIXO */
 .low-stock .product-name {
     color: var(--warning-color);
     font-weight: 700 !important;
@@ -384,7 +380,6 @@ input:focus, select:focus {
     font-size: 1rem;
 }
 
-/* --- MODAIS --- */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -459,6 +454,15 @@ input:focus, select:focus {
   background-color: #cbd5e1;
 }
 
+body.dark-mode .modal-actions .btn-secondary {
+    background-color: #475569;
+    color: #e2e8f0;
+}
+body.dark-mode .modal-actions .btn-secondary:hover {
+    background-color: #64748b;
+}
+
+
 .modal-actions .btn-delete {
   background-color: transparent;
   color: var(--danger-color);
@@ -467,14 +471,13 @@ input:focus, select:focus {
   cursor: pointer;
   transition: all var(--transition-speed) ease;
   padding: 12px 0;
-  margin-right: auto; /* Joga o botão para a esquerda */
+  margin-right: auto;
 }
 .modal-actions .btn-delete:hover {
   text-decoration: underline;
   opacity: 0.8;
 }
 
-/* --- FOOTER --- */
 .main-footer {
     position: fixed;
     bottom: 0;
@@ -487,6 +490,11 @@ input:focus, select:focus {
     background-color: rgba(248, 250, 252, 0.8);
     backdrop-filter: blur(5px);
     border-top: 1px solid var(--border-color);
+    transition: background-color var(--transition-speed), border-color var(--transition-speed), color var(--transition-speed);
+}
+
+body.dark-mode .main-footer {
+    background-color: rgba(15, 23, 42, 0.8);
 }
 
 .main-footer a {

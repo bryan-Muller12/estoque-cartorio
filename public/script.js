@@ -1,7 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Garante que o código só rode na página de estoque
     if (document.body.id !== 'page-estoque') {
-        // Se estiver em outra página (como index.html), verifica o login lá
         if (document.getElementById('login-form')) {
             const usuarios = [
                 { email: 'brysn.ms@gmail.com', senha: 'Palmeiras.12' },
@@ -27,24 +25,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // --- VERIFICAÇÃO DE LOGIN ---
     if (!localStorage.getItem('usuarioLogado')) {
         window.location.href = 'index.html';
     }
 
-    // --- ELEMENTOS DO DOM ---
     const filtroInput = document.getElementById('filtro');
     const sortSelect = document.getElementById('sort-select');
     const listaProdutos = document.getElementById('lista-produtos');
     const logoutBtn = document.getElementById('logout-btn');
     const loadingState = document.getElementById('loading-state');
     
-    // --- Dashboard
-    const totalItensValor = document.getElementById('total-itens-valor');
-    const baixoEstoqueValor = document.getElementById('baixo-estoque-valor');
-    const totalUnidadesValor = document.getElementById('total-unidades-valor');
-
-    // --- Modais
     const openAddModalBtn = document.getElementById('open-add-modal-btn');
     const addModalOverlay = document.getElementById('add-modal-overlay');
     const addForm = document.getElementById('add-form');
@@ -64,21 +54,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteBtn = document.getElementById('delete-btn');
     const editSubmitBtn = editForm.querySelector('button[type="submit"]');
     
-    // --- Notificações
     const notificationsBtn = document.getElementById('notifications-btn');
     const notificationsTab = document.getElementById('notifications-tab');
     const notificationsList = document.getElementById('notifications-list');
     const notificationsBadge = document.getElementById('notifications-badge');
     const clearNotificationsBtn = document.getElementById('clear-notifications-btn');
 
-    // --- Gráfico
     const chartCanvas = document.getElementById('estoque-chart');
     let estoqueChart = null;
+    
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
 
-    // --- ESTADO DA APLICAÇÃO ---
     let produtos = [];
-
-    // --- FUNÇÕES ---
 
     function showToast(message, type = 'success') {
         const colors = {
@@ -108,15 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.innerHTML = originalText;
         }
     }
-    
-    function renderizarDashboard() {
-        const totalUnidades = produtos.reduce((acc, p) => acc + p.quantidade, 0);
-        const itensBaixoEstoque = produtos.filter(p => p.quantidade < p.min_quantidade).length;
-        
-        totalItensValor.textContent = produtos.length;
-        baixoEstoqueValor.textContent = itensBaixoEstoque;
-        totalUnidadesValor.textContent = totalUnidades;
-    }
 
     function renderizarGrafico() {
         if (estoqueChart) {
@@ -124,21 +102,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const ctx = chartCanvas.getContext('2d');
-        const produtosParaGrafico = [...produtos].sort((a,b) => b.quantidade - a.quantidade).slice(0, 10); // Top 10
+        const produtosParaGrafico = [...produtos].sort((a,b) => b.quantidade - a.quantidade).slice(0, 10);
 
         estoqueChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: produtosParaGrafico.map(p => p.nome),
                 datasets: [{
-                    label: 'Quantidade em Estoque',
+                    label: 'Quantidade',
                     data: produtosParaGrafico.map(p => p.quantidade),
                     backgroundColor: 'rgba(79, 70, 229, 0.6)',
                     borderColor: 'rgba(79, 70, 229, 1)',
                     borderWidth: 1
                 }, {
                     type: 'line',
-                    label: 'Estoque Mínimo',
+                    label: 'Mínimo',
                     data: produtosParaGrafico.map(p => p.min_quantidade),
                     borderColor: 'rgba(249, 115, 22, 1)',
                     backgroundColor: 'rgba(249, 115, 22, 0.2)',
@@ -147,11 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }]
             },
             options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                },
+                scales: { y: { beginAtZero: true } },
                 responsive: true,
                 maintainAspectRatio: false
             }
@@ -160,8 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderizarNotificacoes() {
         const notifications = produtos
-            .filter(produto => produto.quantidade < produto.min_quantidade)
-            .map(produto => `<strong>${produto.nome}</strong> está com estoque baixo! (${produto.quantidade} de ${produto.min_quantidade})`);
+            .filter(p => p.quantidade < p.min_quantidade)
+            .map(p => `<strong>${p.nome}</strong> está com estoque baixo! (${p.quantidade} de ${p.min_quantidade})`);
 
         notificationsList.innerHTML = '';
         if (notifications.length > 0) {
@@ -185,25 +159,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let produtosFiltrados = produtos.filter(p => p.nome.toLowerCase().includes(filtro));
         
-        // Ordenação
         switch(sortValue) {
-            case 'nome-asc':
-                produtosFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
-                break;
-            case 'nome-desc':
-                produtosFiltrados.sort((a, b) => b.nome.localeCompare(a.nome));
-                break;
-            case 'qtd-asc':
-                produtosFiltrados.sort((a, b) => a.quantidade - b.quantidade);
-                break;
-            case 'qtd-desc':
-                produtosFiltrados.sort((a, b) => b.quantidade - a.quantidade);
-                break;
+            case 'nome-asc': produtosFiltrados.sort((a, b) => a.nome.localeCompare(b.nome)); break;
+            case 'nome-desc': produtosFiltrados.sort((a, b) => b.nome.localeCompare(a.nome)); break;
+            case 'qtd-asc': produtosFiltrados.sort((a, b) => a.quantidade - b.quantidade); break;
+            case 'qtd-desc': produtosFiltrados.sort((a, b) => b.quantidade - a.quantidade); break;
         }
 
         if (produtosFiltrados.length === 0) {
-            listaProdutos.innerHTML = `<li style="justify-content: center; color: var(--text-light-color);">${filtro ? 'Nenhum produto encontrado.' : 'Seu estoque está vazio.'}</li>`;
-            loadingState.classList.add('hidden');
+            loadingState.textContent = filtro ? 'Nenhum produto encontrado.' : 'Seu estoque está vazio.';
+            loadingState.classList.remove('hidden');
             return;
         }
 
@@ -228,12 +193,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         loadingState.classList.add('hidden');
-        renderizarDashboard();
         renderizarNotificacoes();
         renderizarGrafico();
     }
 
     async function carregarProdutos() {
+        loadingState.textContent = 'Carregando produtos...';
         loadingState.classList.remove('hidden');
         listaProdutos.innerHTML = '';
         try {
@@ -242,7 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
             produtos = await response.json();
             renderizarLista();
         } catch (error) {
-            console.error("Erro ao carregar produtos:", error);
             showToast('Não foi possível conectar ao servidor.', 'error');
             loadingState.textContent = 'Falha ao carregar produtos.';
         }
@@ -260,7 +224,18 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'index.html';
     }
 
-    // --- EVENT LISTENERS ---
+    function aplicarTema(tema) {
+        const icon = themeToggleBtn.querySelector('i');
+        if (tema === 'dark') {
+            document.body.classList.add('dark-mode');
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        } else {
+            document.body.classList.remove('dark-mode');
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+        }
+    }
 
     addForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -281,12 +256,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify(novoProduto)
                 });
                 if (!response.ok) throw new Error('Falha ao adicionar produto');
-                
                 await carregarProdutos();
                 closeModal(addModalOverlay);
                 showToast('Produto adicionado com sucesso!');
             } catch (error) {
-                console.error("Erro:", error);
                 showToast('Não foi possível adicionar o produto.', 'error');
             } finally {
                 toggleLoadingButton(addSubmitBtn, false, originalBtnText);
@@ -310,6 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? produto.quantidade + 1 
                 : Math.max(0, produto.quantidade - 1);
             
+            targetButton.disabled = true;
             try {
                 const response = await fetch(`/api/produtos?id=${id}`, {
                     method: 'PUT',
@@ -319,8 +293,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!response.ok) throw new Error('Falha ao atualizar quantidade');
                 await carregarProdutos();
             } catch (error) {
-                console.error("Erro:", error);
                 showToast("Não foi possível atualizar a quantidade.", 'error');
+            } finally {
+                targetButton.disabled = false;
             }
         }
         else if (targetButton.classList.contains('btn-edit')) {
@@ -336,7 +311,6 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const originalBtnText = editSubmitBtn.innerHTML;
         toggleLoadingButton(editSubmitBtn, true, 'Salvar');
-
         const id = editIdInput.value;
         const produtoAtualizado = {
             nome: editNomeInput.value.trim(),
@@ -352,12 +326,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify(produtoAtualizado)
                 });
                 if (!response.ok) throw new Error('Falha ao salvar alterações');
-
                 await carregarProdutos();
                 closeModal(editModalOverlay);
                 showToast('Produto atualizado com sucesso!');
             } catch (error) {
-                console.error("Erro:", error);
                 showToast("Não foi possível salvar as alterações.", 'error');
             } finally {
                 toggleLoadingButton(editSubmitBtn, false, originalBtnText);
@@ -369,18 +341,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   
     deleteBtn.addEventListener('click', async () => {
-        // Usar um modal customizado no futuro, por enquanto confirm funciona.
         if (confirm('Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.')) {
             const id = editIdInput.value;
             try {
                 const response = await fetch(`/api/produtos?id=${id}`, { method: 'DELETE' });
                 if (!response.ok) throw new Error('Falha ao excluir produto');
-                
                 await carregarProdutos();
                 closeModal(editModalOverlay);
                 showToast('Produto excluído.', 'info');
             } catch (error) {
-                console.error("Erro:", error);
                 showToast("Não foi possível excluir o produto.", 'error');
             }
         }
@@ -408,10 +377,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    themeToggleBtn.addEventListener('click', () => {
+        const novoTema = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+        localStorage.setItem('theme', novoTema);
+        aplicarTema(novoTema);
+    });
+
     filtroInput.addEventListener('input', renderizarLista);
     sortSelect.addEventListener('change', renderizarLista);
     logoutBtn.addEventListener('click', logout);
 
-    // --- INICIALIZAÇÃO ---
+    aplicarTema(localStorage.getItem('theme') || 'light');
     carregarProdutos();
 });

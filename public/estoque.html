@@ -7,14 +7,18 @@
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
-<body>
+<body id="page-estoque">
 
   <nav class="navbar">
     <div class="container">
       <h1 class="logo">Estoque Cartório📦</h1>
       <div class="navbar-actions">
-        <button id="notifications-btn" class="btn-icon">
+        <button id="theme-toggle-btn" class="btn-icon" title="Mudar tema">
+            <i class="fas fa-moon"></i>
+        </button>
+        <button id="notifications-btn" class="btn-icon" title="Notificações">
           <i class="fas fa-bell"></i>
           <span id="notifications-badge" class="badge hidden">0</span>
         </button>
@@ -38,10 +42,19 @@
         </button>
       </div>
       <div class="form-group-filter">
-        <input type="text" id="filtro" placeholder="🔎 Filtrar produtos por nome...">
+          <input type="text" id="filtro" placeholder="🔎 Filtrar produtos por nome...">
+          <select id="sort-select">
+            <option value="nome-asc">Ordenar por Nome (A-Z)</option>
+            <option value="nome-desc">Ordenar por Nome (Z-A)</option>
+            <option value="qtd-asc">Menor Estoque</option>
+            <option value="qtd-desc">Maior Estoque</option>
+          </select>
       </div>
-      <ul id="lista-produtos">
+      <div id="lista-produtos-container">
+        <ul id="lista-produtos">
+          <li id="loading-state">Carregando produtos...</li>
         </ul>
+      </div>
     </div>
   </main>
 
@@ -101,6 +114,7 @@
     <p>Desenvolvido por <a href="https://www.instagram.com/obryanmuller/" target="_blank">Bryan Muller</a></p>
   </footer>
 
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script src="script.js"></script>
 </body>
 </html>

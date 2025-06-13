@@ -7,8 +7,9 @@
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
-<body>
+<body id="page-estoque">
 
   <nav class="navbar">
     <div class="container">
@@ -30,6 +31,22 @@
   </nav>
 
   <main class="container">
+
+    <section class="dashboard">
+      <div class="dashboard-card">
+        <h3>Total de Itens</h3>
+        <p id="total-itens-valor">0</p>
+      </div>
+      <div class="dashboard-card">
+        <h3>Itens com Estoque Baixo</h3>
+        <p id="baixo-estoque-valor">0</p>
+      </div>
+      <div class="dashboard-card">
+        <h3>Total de Unidades</h3>
+        <p id="total-unidades-valor">0</p>
+      </div>
+    </section>
+
     <div class="card">
       <div class="card-header">
         <h2>Meus Produtos</h2>
@@ -38,11 +55,30 @@
         </button>
       </div>
       <div class="form-group-filter">
-        <input type="text" id="filtro" placeholder="🔎 Filtrar produtos por nome...">
+          <input type="text" id="filtro" placeholder="🔎 Filtrar produtos por nome...">
+          <select id="sort-select">
+            <option value="nome-asc">Ordenar por Nome (A-Z)</option>
+            <option value="nome-desc">Ordenar por Nome (Z-A)</option>
+            <option value="qtd-asc">Menor Estoque</option>
+            <option value="qtd-desc">Maior Estoque</option>
+          </select>
       </div>
-      <ul id="lista-produtos">
+      <div id="lista-produtos-container">
+        <ul id="lista-produtos">
+          <li id="loading-state">Carregando produtos...</li>
         </ul>
+      </div>
     </div>
+
+    <div class="card">
+        <div class="card-header">
+          <h2>Visão Geral do Estoque</h2>
+        </div>
+        <div class="card-body">
+            <canvas id="estoque-chart"></canvas>
+        </div>
+    </div>
+
   </main>
 
   <div id="add-modal-overlay" class="modal-overlay hidden">
@@ -101,6 +137,9 @@
     <p>Desenvolvido por <a href="https://www.instagram.com/obryanmuller/" target="_blank">Bryan Muller</a></p>
   </footer>
 
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
   <script src="script.js"></script>
 </body>
 </html>

@@ -26,7 +26,6 @@ body {
     font-family: var(--font-family);
 }
 
-
 body::before {
   content: '';
   position: fixed;
@@ -162,6 +161,37 @@ main.container {
 }
 
 
+/* --- NOVO: DASHBOARD --- */
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.dashboard-card {
+  background: var(--card-bg-color);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  text-align: center;
+}
+
+.dashboard-card h3 {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  color: var(--text-light-color);
+  font-weight: 500;
+}
+
+.dashboard-card p {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
 /* --- CARDS MODERNIZADOS --- */
 .card {
   background: var(--card-bg-color);
@@ -186,13 +216,22 @@ main.container {
   font-size: 1.25rem;
 }
 
-/* --- FORMULÁRIOS E BOTÕES --- */
-.form-group-filter {
+.card-body {
     padding: 25px;
 }
 
+/* --- FORMULÁRIOS E BOTÕES --- */
+/* ATUALIZADO: para suportar múltiplos elementos */
+.form-group-filter {
+    padding: 25px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
 input[type="text"],
-input[type="number"] {
+input[type="number"],
+select {
   width: 100%;
   padding: 12px 15px;
   border: 1px solid var(--border-color);
@@ -201,13 +240,18 @@ input[type="number"] {
   background-color: #f8fafc;
   transition: all var(--transition-speed) ease;
   box-sizing: border-box; 
+  color: var(--text-color);
 }
 
-input:focus {
+input:focus, select:focus {
   outline: none;
   border-color: var(--primary-color);
   background-color: var(--card-bg-color);
   box-shadow: 0 0 0 3px var(--shadow-color);
+}
+
+#sort-select {
+    max-width: 250px;
 }
 
 .btn-primary {
@@ -225,9 +269,13 @@ input:focus {
   align-items: center;
   gap: 8px;
 }
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 7px 10px -3px var(--shadow-color);
+}
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .btn-danger {
